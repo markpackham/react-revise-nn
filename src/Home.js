@@ -1,30 +1,32 @@
 import { useState, useEffect } from "react";
 import BlogList from "./BlogList";
 
-const Home = () => {
-  const [blogs, setBlogs] = useState([
-    { title: "My new website", body: "lorem ipsum...", author: "mario", id: 1 },
-    { title: "Welcome party!", body: "lorem ipsum...", author: "yoshi", id: 2 },
-    {
-      title: "Web dev top tips",
-      body: "lorem ipsum...",
-      author: "mario",
-      id: 3,
-    },
-  ]);
+// use json-server to access data since a real database isn't used
+// npx json-server --watch data/db.json --port 8000
+// http://localhost:8000/blogs
 
-  const handleDelete = (id) => {
-    const newBlogs = blogs.filter((blog) => blog.id !== id);
-    setBlogs(newBlogs);
-  };
+const Home = () => {
+  const [blogs, setBlogs] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log(blogs);
-  });
+    fetch("http://localhost:8000/blogs")
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setBlogs(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
 
   return (
     <div className="home">
-      <BlogList blogs={blogs} title="All Blogs" handleDelete={handleDelete} />
+      {isLoading && <div>Loading...</div>}
+      {blogs && <BlogList blogs={blogs} title="All Blogs" />}
     </div>
   );
 };
